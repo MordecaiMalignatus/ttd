@@ -1,0 +1,45 @@
+* =ttd=: A new configuration of a build system ala carte.
+** Concept
+If you've read the Build Systems a la Carte paper:
+- Topographical scheduler
+- Explicit traces/inferred traces.
+- Additionally:
+  - Nix-like intermediate product store
+  - Integration with common project/project language specific build tools to
+    avoid =cargo-raze=.
+  - Use of an actual programming language for configuration. ([[https://rhai.rs/][Rhai]])
+
+To expand on these things in turn:
+
+*** Topographical Scheduler
+Each artifact/build target declares its requirements for being built, then all
+requirements are resolved, then sorted topographically.
+
+*** Explicit Traces
+Declared inputs are hashed and the input hash stored. On re-build, the current
+hash is checked against the stored hash, if it has changed, we rebuild.
+
+*** Nix-like intermediate product store
+Arguably, Nix' one good idea was the nix store, a hash-addressed index of the
+built targets. We can steal this and make this the basis for remote/cluster
+building/caching.
+
+*** Integration with common project/dependency managers used in projects.
+Most programming languages use their own tool to manage project builds, and to
+wrangle the compiler, for example, =cargo=, =maven=, =sbt=, =go=, =poetry= and
+so on. It would be a fool's errand to recreate their functionality in soemthing
+that is as much of an exploratory attempt at a build tool as =ttd=, given that
+even Google struggles with the tooling required to turn =cargo= projects into
+=BUILD= files that will work with Bazel, see [[https://github.com/google/cargo-raze][cargo-raze]].
+
+*** Use of an actual programming language
+Bazel uses Starlark, a declarative-ish subset of python. Nix uses
+Nix-but-the-langauge, a strongly-restricted functional language. I propose we
+give up that trend and just use an actual programming language that has types
+and functions and then provide an interface to the tool with registration
+functions.
+
+* Q&A
+** What's that name?
+It's short for =terrible, terrible damage=, something that has stuck with me
+from Starcraft and has become a favourite placeholder of mine.
