@@ -1,19 +1,48 @@
 * =ttd=: A new configuration of a build system ala carte.
 ** Concept
 If you've read the Build Systems a la Carte paper:
-- Topographical scheduler
+- Topological scheduler
 - Explicit traces/inferred traces.
 - Additionally:
   - Nix-like intermediate product store
-  - Integration with common project/project language specific build tools to
-    avoid =cargo-raze=.
-  - Use of an actual programming language for configuration. ([[https://rhai.rs/][Rhai]])
+  - Integration with common project/project language specific build tools, like
+    being able to delegate builds to =cargo=.
+  - Use of a full programming language for configuration.
 
-To expand on these things in turn:
+Even so, =ttd= aims to be more coarse-grained than generic build tools like
+=make=. While it is desired to be able to track and compile artefacts all the
+way down to the object file, it aims more at a nix/bazel-like tracking and
+organising of dependencies. To this end, we take focus away from the
+file-produces-another-file semantics of =make= et al, and instead towards the
+larger scope of projects and libraries, with their complexities and richer
+concepts.
 
-*** Topographical Scheduler
+The primary focus of the semantics of =ttd= is the human *artefact*, an object
+that is imbued with meaning acquired from the sociotechnical engineering
+process, not strictly just the computational result. This means that a
+documentation website is as much of an artefact as a binary is, that docker
+containers get the same semantic representation as source files, and that in
+this, we orient =ttd= more around the engineer trying to do things that have
+meaning to *them*.
+
+With this claim to want to center artefacts comes the problem of extensibility,
+what precisely counts as an artefact and what does not differs from organisation
+to organisation, developer to developer. That's an impossibly broad scope to
+support, especially support out of the box, so we have to make sure that
+communicating what an artefact is, from the engineer to =ttd=, is simple and not
+burdensome. In short, =ttd= has to be able to *grow*. Therefore we use a
+programming language to define builds, rather than a declarative DSL, so that
+users may define their own artefacts and what to do with them, and do so
+alongside the rest of their application code. This enables to use libraries and
+plugins to be developed indpendently, and then supplied to =ttd= where they are
+needed. Of course, as many libraries and definitions as we can support by
+default will be supported by default.
+
+To expand on the list above in turn:
+
+*** Topological Scheduler
 Each artifact/build target declares its requirements for being built, then all
-requirements are resolved, then sorted topographically.
+requirements are resolved, then sorted topologically.
 
 *** Explicit Traces
 Declared inputs are hashed and the input hash stored. On re-build, the current
@@ -27,10 +56,14 @@ building/caching.
 *** Integration with common project/dependency managers used in projects.
 Most programming languages use their own tool to manage project builds, and to
 wrangle the compiler, for example, =cargo=, =maven=, =sbt=, =go=, =poetry= and
-so on. It would be a fool's errand to recreate their functionality in soemthing
+so on. It would be a fool's errand to recreate their functionality in something
 that is as much of an exploratory attempt at a build tool as =ttd=, given that
 even Google struggles with the tooling required to turn =cargo= projects into
 =BUILD= files that will work with Bazel, see [[https://github.com/google/cargo-raze][cargo-raze]].
+
+Even with this, =ttd= aims to make the builds by these external tools as
+reproducible and maintainable as possible, which extends to tracking and
+resolving the dependencies.
 
 *** Use of an actual programming language
 Bazel uses Starlark, a declarative-ish subset of python. Nix uses
